@@ -1,44 +1,10 @@
-
-// import { View, Text } from 'react-native'
-// import React from 'react'
-// import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo'
-// import { Link } from 'expo-router'
-// import { SignOutButton } from '@/components/SignOutButton'
-
-// const profile = () => {
-//   const { user } = useUser()
-//   return (
-//     <View>
-//       <View>
-//       <Text>Profile</Text>
-//       </View>
-//       <SignedIn>
-//         <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
-//         <SignOutButton />
-//       </SignedIn>
-//       <SignedOut>
-//         <Link href="/(auth)/login">
-//           <Text>Sign in</Text>
-//         </Link>
-//         <Link href="/(auth)/signup">
-//           <Text>Sign up</Text>
-//         </Link>
-//       </SignedOut>
-//     </View>
-//   )
-// }
-
-// export default profile
-
-// app/(tabs)/profile.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
-  ScrollView,
+  FlatList,
   Alert,
   TouchableOpacity,
-  FlatList,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -46,13 +12,14 @@ import UserAvatar from "@/components/UserAvatar";
 import ThemeCard from "@/components/ThemeCard";
 import PostItem from "@/components/PostItem";
 import { ProfileStyles } from "@/assets/styles/profile.styles";
+import { styles as feedStyles } from "@/assets/styles/feed.styles";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import * as userService from "@/services/userService";
 import * as postService from "@/services/postService";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import EditPostModal from "@/components/EditPostModal";
-import { COLORS, ThemeKey } from "@/constants/colors";
+import { ThemeKey } from "@/constants/colors";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -66,10 +33,19 @@ export default function ProfileScreen() {
   const [editPost, setEditPost] = useState<any | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  const themeOptions = Object.keys(themes) as ThemeKey[];
+  const flatListRef = useRef<FlatList>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
   useEffect(() => {
     loadProfile();
     loadMyPosts();
   }, []);
+
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowScrollTop(offsetY > 200);
+  };
 
   async function loadProfile() {
     setLoading(true);
@@ -124,107 +100,119 @@ export default function ProfileScreen() {
     }
   }
 
-  const themeOptions = Object.keys(themes);
-
   if (loading || !user) {
     return (
       <View style={[ProfileStyles.container, { justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={themes[themeName].primary} />
       </View>
     );
   }
 
   return (
     <View style={ProfileStyles.container}>
-      <ScrollView contentContainerStyle={ProfileStyles.scrollContainer}>
-        {/* User Info */}
-        <View style={ProfileStyles.header}>
-          <UserAvatar name={user.name} size={96} />
-          <Text style={ProfileStyles.name}>{user.name}</Text>
-          <Text style={ProfileStyles.email}>{user.email}</Text>
-          {user.phone ? <Text style={ProfileStyles.phone}>{user.phone}</Text> : null}
-        </View>
+      <FlatList
+        ref={flatListRef}
+        data={myPosts}
+        keyExtractor={(item) => item.id}
+        refreshing={refreshing}
+        onRefresh={loadMyPosts}
+        onEndReachedThreshold={0.5}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ padding: 16, paddingBottom: 50, marginBottom: 50 }}
+        ListHeaderComponent={
+          <>
+            {/* User Info */}
+            <View style={ProfileStyles.header}>
+              <UserAvatar name={user.name} size={96} />
+              <Text style={ProfileStyles.name}>{user.name}</Text>
+              <Text style={ProfileStyles.email}>{user.email}</Text>
+              {user.phone && <Text style={ProfileStyles.phone}>{user.phone}</Text>}
+            </View>
 
-        {/* Account actions */}
-        <View style={ProfileStyles.section}>
-          <Text style={ProfileStyles.sectionTitle}>Account</Text>
-          <TouchableOpacity
-            style={ProfileStyles.button}
-            onPress={() => setPwModalVisible(true)}
-          >
-            <Text style={ProfileStyles.buttonText}>Change Password</Text>
-          </TouchableOpacity>
-        </View>
+            {/* Account actions */}
+            <View style={ProfileStyles.section}>
+              <Text style={ProfileStyles.sectionTitle}>Account</Text>
+              <TouchableOpacity
+                style={ProfileStyles.button}
+                onPress={() => setPwModalVisible(true)}
+              >
+                <Text style={ProfileStyles.buttonText}>Change Password</Text>
+              </TouchableOpacity>
+            </View>
 
-        {/* Theme Selection */}
-        <View style={ProfileStyles.section}>
-          <Text style={ProfileStyles.sectionTitle}>Theme</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: 8 }}>
-            {themeOptions.map((tName) => {
-              const key = tName as ThemeKey;  // cast string to ThemeKey
-              return (
-                <ThemeCard
-                  key={key}
-                  themeKey={key}
-                  theme={themes[key]}
-                  active={themeName === key}
-                  onPress={() => setThemeName(key)}
-                />
-              );
-            })}
-
-          </ScrollView>
-        </View>
-
-        {/* User posts */}
-        <View style={ProfileStyles.section}>
-          <Text style={ProfileStyles.sectionTitle}>Your posts</Text>
-
-          <FlatList
-            data={myPosts}
-            keyExtractor={(item) => item.id}
-            refreshing={refreshing}
-            onRefresh={loadMyPosts}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <PostItem
-                post={item}
-                onEdit={() => setEditPost(item)}
-                onDelete={() => handleDeletePost(item.id)}
+            {/* Theme Selection */}
+            <View style={ProfileStyles.section}>
+              <Text style={ProfileStyles.sectionTitle}>Theme</Text>
+              <FlatList
+                horizontal
+                data={themeOptions}
+                keyExtractor={(item) => item}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <ThemeCard
+                    themeKey={item}
+                    theme={themes[item]}
+                    active={themeName === item}
+                    onPress={() => setThemeName(item)}
+                  />
+                )}
+                contentContainerStyle={{ paddingVertical: 8 }}
               />
-            )}
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            ListEmptyComponent={<Text style={ProfileStyles.emptyText}>No posts yet.</Text>}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
-        </View>
+            </View>
 
-        {/* Logout */}
-        <View style={ProfileStyles.section}>
-          <TouchableOpacity
-            style={[ProfileStyles.button, { backgroundColor: "#ff5757" }]}
-            onPress={() =>
-              Alert.alert("Logout", "Do you want to log out?", [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Logout",
-                  style: "destructive",
-                  onPress: async () => {
-                    try {
-                      await logout();
-                      router.replace("/login"); // or your auth route
-                    } catch (e) {
-                      Alert.alert("Error", "Logout failed");
-                    }
-                  },
+            {/* Section Title for Posts */}
+            <View style={ProfileStyles.section}>
+              <Text style={ProfileStyles.sectionTitle}>Your posts</Text>
+            </View>
+          </>
+        }
+        renderItem={({ item }) => (
+          <PostItem
+            post={item}
+            onEdit={() => setEditPost(item)}
+            onDelete={() => handleDeletePost(item.id)}
+          />
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ListEmptyComponent={
+          <Text style={ProfileStyles.emptyText}>No posts yet.</Text>
+        }
+      />
+      {showScrollTop && myPosts.length > 0 && (
+        <TouchableOpacity
+          style={[feedStyles.scrollTopButton, {marginBottom: 50}]}
+          onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
+        >
+          <Text style={feedStyles.scrollTopArrow}>↑</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Logout */}
+      <View style={{ padding: 16 }}>
+        <TouchableOpacity
+          style={[ProfileStyles.button, { backgroundColor: "#ff5757" }]}
+          onPress={() =>
+            Alert.alert("Logout", "Do you want to log out?", [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Logout",
+                style: "destructive",
+                onPress: async () => {
+                  try {
+                    await logout();
+                    router.replace("/login");
+                  } catch (e) {
+                    Alert.alert("Error", "Logout failed");
+                  }
                 },
-              ])
-            }
-          >
-            <Text style={ProfileStyles.buttonText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+              },
+            ])
+          }
+        >
+          <Text style={ProfileStyles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Modals */}
       <ChangePasswordModal
@@ -245,4 +233,3 @@ export default function ProfileScreen() {
     </View>
   );
 }
-

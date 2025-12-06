@@ -19,6 +19,34 @@ const DUMMY = [
     text: "Another post to test profile editing and deletion.",
     date: new Date().toISOString(),
   },
+  {
+    id: "p3",
+    userId: "user-1",
+    username: "Hasibul Hasan",
+    text: "Hello from my profile! This is a sample post.",
+    date: new Date().toISOString(),
+  },
+  {
+    id: "p4",
+    userId: "user-1",
+    username: "Hasibul Hasan",
+    text: "Another post to test profile editing and deletion.",
+    date: new Date().toISOString(),
+  },
+  {
+    id: "p5",
+    userId: "user-1",
+    username: "Hasibul Hasan",
+    text: "Hello from my profile! This is a sample post.",
+    date: new Date().toISOString(),
+  },
+  {
+    id: "p6",
+    userId: "user-1",
+    username: "Hasibul Hasan",
+    text: "Another post to test profile editing and deletion.",
+    date: new Date().toISOString(),
+  },
 ];
 
 async function ensureInit() {
@@ -29,10 +57,11 @@ async function ensureInit() {
 }
 
 export async function getPostsByUser(userId: string) {
-  await ensureInit();
-  const raw = await AsyncStorage.getItem(POSTS_KEY);
-  const all = raw ? JSON.parse(raw) : [];
-  return all.filter((p: any) => p.userId === userId).sort((a: any, b: any) => (b.date > a.date ? 1 : -1));
+  // await ensureInit();
+  // const raw = await AsyncStorage.getItem(POSTS_KEY);
+  // const all = raw ? JSON.parse(raw) : [];
+  // return all.filter((p: any) => p.userId === userId);
+  return DUMMY.filter((p) => p.userId === userId);
 }
 
 export async function deletePost(id: string) {
