@@ -20,6 +20,8 @@ import * as postService from "@/services/postService";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import EditPostModal from "@/components/EditPostModal";
 import { ThemeKey } from "@/constants/colors";
+import { useClerk } from "@clerk/clerk-expo";
+import * as Linking from 'expo-linking'
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -36,6 +38,7 @@ export default function ProfileScreen() {
   const themeOptions = Object.keys(themes) as ThemeKey[];
   const flatListRef = useRef<FlatList>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { signOut } = useClerk()
 
   useEffect(() => {
     loadProfile();
@@ -46,6 +49,17 @@ export default function ProfileScreen() {
     const offsetY = event.nativeEvent.contentOffset.y;
     setShowScrollTop(offsetY > 200);
   };
+
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      // Redirect to Login
+      Linking.openURL(Linking.createURL('/(auth)/login'))
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2))
+    }
+  }
 
   async function loadProfile() {
     setLoading(true);
@@ -200,8 +214,7 @@ export default function ProfileScreen() {
                 style: "destructive",
                 onPress: async () => {
                   try {
-                    await logout();
-                    router.replace("/login");
+                    await handleSignOut();
                   } catch (e) {
                     Alert.alert("Error", "Logout failed");
                   }

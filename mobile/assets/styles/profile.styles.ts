@@ -5,7 +5,7 @@ import { COLORS } from "@/constants/colors";
 export const ProfileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.background || "#F5F5F5",
   },
   scrollContainer: {
     padding: 16,

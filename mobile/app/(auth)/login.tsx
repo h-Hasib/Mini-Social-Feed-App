@@ -33,7 +33,7 @@ export default function Page() {
       } else {
         // If the status isn't complete, check why. User might need to
         // complete further steps.
-        console.error(JSON.stringify(signInAttempt, null, 2))
+        // console.error(JSON.stringify(signInAttempt, null, 2))
       }
     } catch (err : any) {
       if (err.errors?.[0]?.code === 'form_identifier_not_found'){
@@ -48,7 +48,7 @@ export default function Page() {
       else {
         setError("Something went wrong, please try again")
       }
-      console.error(JSON.stringify(err, null, 2))
+      // console.error(JSON.stringify(err, null, 2))
     }
   }
 

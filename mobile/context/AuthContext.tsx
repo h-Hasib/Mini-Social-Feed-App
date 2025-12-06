@@ -9,9 +9,10 @@ import * as authService from "@/services/authService";
 
 type AuthContextType = {
   userId: string;
+  user?: { name: string; email: string; phone?: string }; // add this
   logout: () => Promise<void>;
+  login?: () => Promise<void>;
 };
-
 const AuthContext = createContext<AuthContextType>({
   userId: "user-1",
   logout: async () => {},
