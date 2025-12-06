@@ -5,7 +5,7 @@ export default function AuthRoutesLayout() {
   const { isSignedIn } = useAuth()
 
   if (isSignedIn) {
-    return <Redirect href={'/profile'} />
+    return <Redirect href={'/feed'} />
   }
   return <Stack screenOptions={{ headerShown: false }}/>
 }
