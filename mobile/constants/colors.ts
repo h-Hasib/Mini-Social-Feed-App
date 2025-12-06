@@ -55,7 +55,10 @@ export const THEMES = {
   forest: forestTheme,
   purple: purpleTheme,
   ocean: oceanTheme,
-};
+} as const;
+
+// Type of allowed theme keys
+export type ThemeKey = keyof typeof THEMES;
 
 // 👇 change this to switch theme
 export const COLORS = THEMES.coffee;
