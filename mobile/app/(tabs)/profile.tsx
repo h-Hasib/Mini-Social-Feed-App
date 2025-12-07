@@ -20,6 +20,8 @@ import ChangePasswordModal from "@/components/ChangePasswordModal";
 import EditPostModal from "@/components/EditPostModal";
 import { ThemeKey } from "@/constants/colors";
 import * as Linking from 'expo-linking'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logoutUser } from '../../services/authService';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -33,6 +35,7 @@ export default function ProfileScreen() {
   const themeOptions = Object.keys(themes) as ThemeKey[];
   const flatListRef = useRef<FlatList>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -44,14 +47,17 @@ export default function ProfileScreen() {
     setShowScrollTop(offsetY > 200);
   };
 
-  
   const handleSignOut = async () => {
+    setError('');
+    setLoading(true);
     try {
-      // await signOut()
-      // Redirect to Login
-      Linking.openURL(Linking.createURL('/(auth)/login'))
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2))
+      await logoutUser();
+      router.replace('/(auth)/login'); // Navigate back to login
+    } catch (err: any) {
+      setError(err.message);
+      Alert.alert("Error", "Logout failed, please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -206,18 +212,13 @@ export default function ProfileScreen() {
               {
                 text: "Logout",
                 style: "destructive",
-                onPress: async () => {
-                  try {
-                    await handleSignOut();
-                  } catch (e) {
-                    Alert.alert("Error", "Logout failed");
-                  }
-                },
+                onPress: handleSignOut,
               },
             ])
           }
+          disabled={loading}
         >
-          <Text style={ProfileStyles.buttonText}>Logout</Text>
+          <Text style={ProfileStyles.buttonText}>{loading ? 'Logging Out...' : 'Logout'}</Text>
         </TouchableOpacity>
       </View>
 

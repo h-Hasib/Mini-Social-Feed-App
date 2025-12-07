@@ -1,21 +1,36 @@
-import { Link, useRouter } from 'expo-router'
-import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { useState } from 'react'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { styles } from '@/assets/styles/auth.styles'
-import { Ionicons } from '@expo/vector-icons'
-import { COLORS } from '@/constants/colors'
+import { Link, useRouter } from 'expo-router';
+import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { styles } from '@/assets/styles/auth.styles';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '@/constants/colors';
+import { loginUser } from '../../services/authService';
 
 export default function Page() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  // Handle the submission of the sign-in form
+  const [emailAddress, setEmailAddress] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const onSignInPress = async () => {
-    router.replace('/feed')
-  }
+    setError('');
+    setLoading(true);
+
+    try {
+      const payload = { email: emailAddress, password };
+      const response = await loginUser(payload);
+
+      console.log('Login Success:', response);
+      router.replace('/feed'); // Navigate after successful login
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAwareScrollView 
@@ -27,6 +42,7 @@ export default function Page() {
       <View style={styles.container}>
         <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.illustration}/>
         <Text style={styles.title}>Welcome Back!</Text>
+        
         {error ? (
           <View style={styles.errorBox}>
             <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
@@ -54,10 +70,10 @@ export default function Page() {
           secureTextEntry={true}
           onChangeText={(password) => setPassword(password)}
         />
-        <TouchableOpacity style={styles.button} onPress={onSignInPress}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity style={styles.button} onPress={onSignInPress} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
         </TouchableOpacity>
-      
+
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>Don&apos;t have an account?</Text>
           <Link href="/signup" asChild>

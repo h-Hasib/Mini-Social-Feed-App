@@ -1,22 +1,112 @@
-// src/services/authService.ts
-/**
- * Dummy auth service. Replace implementations with Clerk or your auth provider.
- */
+// app/services/auth.services.ts
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export async function logout() {
-  // TODO: call Clerk's signOut or your backend logout
-  // Example for Clerk:
-  // await signOut();
-  return new Promise((res) => setTimeout(res, 300));
+const API_BASE_URL = 'https://mini-social-feed-app.vercel.app';
+
+// Axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Attach token to every request if available
+api.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('accessToken');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Login payload
+interface LoginPayload {
+  email: string;
+  password: string;
 }
 
-export function getCurrentUserId() {
-  // For dummy data we return a fixed id. Replace with actual current user id.
-  return "user-1";
+// Response type
+interface LoginResponse {
+  message: string;
+  accessToken: string;
+  sessionId: string;
+  user: {
+    id: string;
+    email: string;
+    userName: string;
+  };
+}
+interface signupPayload {
+  email: string;
+  password: string;
+  userName: string;
+}
+interface signupResponse {
+  message: string;
+  accessToken: string;
+  sessionId: string;
+  user: {
+    id: string;
+    email: string;
+    userName: string;
+  };
 }
 
-export async function changePassword({ oldPassword, newPassword }: { oldPassword: string; newPassword: string; }) {
-  // TODO: implement via your auth provider
-  // This is a stub that accepts any input.
-  return new Promise((res) => setTimeout(res, 400));
-}
+export const signupUser = async (payload: signupPayload): Promise<signupResponse> => {
+  try {
+    const response = await api.post('/auth/signup', payload);
+    
+    // Save token & user in AsyncStorage
+    await AsyncStorage.setItem('accessToken', response.data.accessToken);
+    await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error('Something went wrong. Please try again.');
+    }
+  }
+};
+
+// Login function
+export const loginUser = async (payload: LoginPayload): Promise<LoginResponse> => {
+  try {
+    const response = await api.post('/auth/login', payload);
+    
+    // Save token & user in AsyncStorage
+    await AsyncStorage.setItem('accessToken', response.data.accessToken);
+    await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error('Something went wrong. Please try again.');
+    }
+  }
+};
+
+
+export const logoutUser = async () => {
+  try {
+    // Call backend logout endpoint
+    await api.post('/auth/logout', {}); // payload is empty
+
+    // Clear AsyncStorage
+    await AsyncStorage.removeItem('accessToken');
+    await AsyncStorage.removeItem('user');
+  } catch (error: any) {
+    console.warn('Logout failed', error?.response?.data || error.message);
+    // Still clear AsyncStorage to prevent stuck session
+    await AsyncStorage.removeItem('accessToken');
+    await AsyncStorage.removeItem('user');
+  }
+};
+
+// Export api for other authenticated requests
+export { api };
