@@ -2,7 +2,7 @@
 import { Router } from "express";
 import { Request, Response } from "express";
 import { refresh, login, logout, signup, logoutAllDevices } from "../services/auth.services";
-import { authenticateToken } from "@/middleware/auth.middleware";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 

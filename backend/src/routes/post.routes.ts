@@ -11,7 +11,7 @@ import {
   getCommentsByPost,
   getPostsByCategory
 } from "../services/post.services";
-import { authenticateToken } from "@/middleware/auth.middleware";
+import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
 
