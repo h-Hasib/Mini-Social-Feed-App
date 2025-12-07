@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
 import { loginUser } from '../../services/authService';
 
-export default function Page() {
+export default function LoginScreen() {
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState('');

@@ -22,23 +22,23 @@ export default function TabsLayout() {
         tabBarLabelStyle: {
         fontSize: 12,
         fontWeight: '600',
-        },
-    tabBarIcon: ({ focused, color, size }) => {
-      let iconName: string = 'home';
-      let IconComponent: any = Ionicons;
-      if (route.name === 'Feed') {
-        iconName = focused ? 'home' : 'home-outline';
-        IconComponent = Ionicons;
-      } else if (route.name === 'Post') {
-        iconName = focused ? 'plus-circle' : 'plus';
-        IconComponent = FontAwesome5;
-      } else if (route.name === 'Profile') {
-        iconName = focused ? 'user-alt' : 'user';
-        IconComponent = FontAwesome5;
-      }
-      return <IconComponent name={iconName as any} size={28} color={color} />;
       },
-    })}
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName: string = 'home';
+        let IconComponent: any = Ionicons;
+        if (route.name === 'Feed') {
+          iconName = focused ? 'home' : 'home-outline';
+          IconComponent = Ionicons;
+        } else if (route.name === 'Post') {
+          iconName = focused ? 'plus-circle' : 'plus';
+          IconComponent = FontAwesome5;
+        } else if (route.name === 'Profile') {
+          iconName = focused ? 'user-alt' : 'user';
+          IconComponent = FontAwesome5;
+        }
+        return <IconComponent name={iconName as any} size={28} color={color} />;
+        },
+      })}
     >
       <Tab.Screen name="Feed" component={Feed} />
       <Tab.Screen name="Post" component={CreatePost} />

@@ -8,8 +8,7 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     padding: 16,
   },
-
-
+  
   // Search Bar
   searchContainer: {
     flexDirection: 'row',
@@ -52,42 +51,101 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+
   cardHeader: {
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
+
+  leftBlock: {
+    flexDirection: "column",
+  },
+
+  headerRight: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+    flexShrink: 1,
+    flexDirection: "row",
+  },
+
+  tagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+    gap: 6,
+  },
+
+  tag: {
+    backgroundColor: COLORS.border,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+    marginLeft: 5,
+  },
+
+  tagText: {
+    fontSize: 11,
+    color: COLORS.text,
+    fontWeight: "500",
+  },
+  
   username: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.text,
   },
+  
   email: {
     fontSize: 14,
     color: COLORS.textLight,
   },
+
   date: {
     fontSize: 12,
     color: COLORS.textLight,
     marginTop: 2,
   },
+
   postText: {
     fontSize: 16,
     color: COLORS.text,
     marginVertical: 10,
   },
 
-
   // Actions
   actionRow: {
     flexDirection: 'row',
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 10,
   },
+
+  actionGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4, 
+  },
+
+  countText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: COLORS.primary,
+  },
+
+  actionEmoji: {
+    fontSize: 16,
+    marginLeft: 4,
+  },
+
   actionButton: {
     marginRight: 20,
   },
+
   actionText: {
-    fontSize: 16,
+    fontSize: 14,
+    marginLeft: 4,
     color: COLORS.primary,
-    fontWeight: '600',
   },
 
   //Scroll to Top
@@ -106,6 +164,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+
   scrollTopArrow: {
     color: COLORS.white,
     fontSize: 26,

@@ -22,25 +22,64 @@ import { ThemeKey } from "@/constants/colors";
 import * as Linking from 'expo-linking'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logoutUser } from '../../services/authService';
+import { getCurrentUser } from '../../services/authService';
+import { StyleSheet } from 'react-native';
+import { getPostsByUser } from '../../services/postService';
+
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [posts, setPosts] = useState<postService.Post[]>([]);
+  const flatListRef = React.useRef<FlatList<any> | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const { themeName, themes, setThemeName } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [myPosts, setMyPosts] = useState<any[]>([]);
   const [pwModalVisible, setPwModalVisible] = useState(false);
   const [editPost, setEditPost] = useState<any | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const themeOptions = Object.keys(themes) as ThemeKey[];
-  const flatListRef = useRef<FlatList>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const [error, setError] = useState('');
+  
 
   useEffect(() => {
-    loadProfile();
-    loadMyPosts();
+    loadUserProfile();
+    fetchPosts();
   }, []);
+
+  const loadUserProfile = async () => {
+    setLoading(true);
+    try {
+      // Get user from AsyncStorage
+      const userJson = await AsyncStorage.getItem('user');
+      
+      if (userJson) {
+        const userData = JSON.parse(userJson);
+        setUser(userData);
+        
+        // Fetch user's posts using their ID
+        const userPosts = await getPostsByUser(userData.id);
+        setPosts(userPosts);
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchPosts = async () => {
+    setLoading(true);
+    setRefreshing(true);
+    try {
+      const data = await getPostsByUser(user.id)
+      setPosts(data);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to fetch posts");
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  };
 
   const handleScroll = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -61,30 +100,6 @@ export default function ProfileScreen() {
     }
   }
 
-  async function loadProfile() {
-    setLoading(true);
-    try {
-      const u = await userService.getUser("user-1");
-      setUser(u);
-    } catch (e) {
-      console.warn("Failed to load user", e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function loadMyPosts() {
-    setRefreshing(true);
-    try {
-      const posts = await postService.getPostsByUser("user-1");
-      setMyPosts(posts);
-    } catch (e) {
-      console.warn("Failed to load posts", e);
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
   async function handleDeletePost(id: string) {
     Alert.alert("Delete post", "Are you sure you want to delete this post?", [
       { text: "Cancel", style: "cancel" },
@@ -94,7 +109,7 @@ export default function ProfileScreen() {
         onPress: async () => {
           try {
             await postService.deletePost(id);
-            setMyPosts((prev) => prev.filter((p) => p.id !== id));
+            setPosts((prev) => prev.filter((p) => p.id !== id));
             Alert.alert("Deleted", "Post deleted");
           } catch (e) {
             Alert.alert("Error", "Could not delete post");
@@ -107,7 +122,7 @@ export default function ProfileScreen() {
   async function handleUpdatePost(updated: any) {
     try {
       const post = await postService.updatePost(updated.id, updated);
-      setMyPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));
+      setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));
       setEditPost(null);
     } catch (e) {
       Alert.alert("Error", "Could not update post");
@@ -122,14 +137,30 @@ export default function ProfileScreen() {
     );
   }
 
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <View style={styles.centered}>
+        <Text>No user logged in</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={ProfileStyles.container}>
       <FlatList
         ref={flatListRef}
-        data={myPosts}
+        data={posts}
         keyExtractor={(item) => item.id}
         refreshing={refreshing}
-        onRefresh={loadMyPosts}
+        onRefresh={fetchPosts}
         onEndReachedThreshold={0.5}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -138,8 +169,8 @@ export default function ProfileScreen() {
           <>
             {/* User Info */}
             <View style={ProfileStyles.header}>
-              <UserAvatar name={user.name} size={96} />
-              <Text style={ProfileStyles.name}>{user.name}</Text>
+              <UserAvatar name={user.userName} size={96} />
+              <Text style={ProfileStyles.name}>{user.userName}</Text>
               <Text style={ProfileStyles.email}>{user.email}</Text>
               {user.phone && <Text style={ProfileStyles.phone}>{user.phone}</Text>}
             </View>
@@ -188,12 +219,12 @@ export default function ProfileScreen() {
             onDelete={() => handleDeletePost(item.id)}
           />
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
         ListEmptyComponent={
           <Text style={ProfileStyles.emptyText}>No posts yet.</Text>
         }
       />
-      {showScrollTop && myPosts.length > 0 && (
+      {showScrollTop && posts.length > 0 && (
         <TouchableOpacity
           style={[feedStyles.scrollTopButton, {marginBottom: 50}]}
           onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
@@ -241,3 +272,67 @@ export default function ProfileScreen() {
     </View>
   );
 }
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  username: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  email: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 5,
+  },
+  userId: {
+    fontSize: 12,
+    color: '#999',
+  },
+  postsSection: {
+    flex: 1,
+    padding: 15,
+  },
+  postsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  postCard: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  postTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 5,
+  },
+  postContent: {
+    fontSize: 14,
+    color: '#555',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#999',
+    marginTop: 20,
+  },
+});

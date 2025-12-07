@@ -108,5 +108,16 @@ export const logoutUser = async () => {
   }
 };
 
+export const getCurrentUser = async () => {
+  try {
+    const userJson = await AsyncStorage.getItem('user');
+    return userJson ? JSON.parse(userJson) : null;
+  } catch (error) {
+    console.error('Failed to get current user:', error);
+    return null;
+  }
+};
+
+
 // Export api for other authenticated requests
 export { api };

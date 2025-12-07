@@ -32,18 +32,18 @@ export const createPost = async (req: Request, res: Response) => {
 export const getPosts = async (_: Request, res: Response) => {
   try {
     const snapshot = await db.collection("posts").orderBy("createdAt", "desc").get();
-
     const posts = await Promise.all(snapshot.docs.map(async (doc) => {
       const data = doc.data();
+      const postId = doc.id;
       const commentsSnapshot = await db.collection("comments")
-                                        .where("postId", "==", doc.id)
+                                        .where("postId", "==", postId)
                                         .get();
 
       return {
-        id: doc.id,
+        id: postId,
         ...data,
-        totalLikes: data.likes.length || 0,
-        totalComments: commentsSnapshot.size || 0
+        totalLikes: Array.isArray(data.likes) ? data.likes.length : 0,
+        totalComments: commentsSnapshot.size,
       };
     }));
 
@@ -115,7 +115,6 @@ export const getPostsByCategory = async (req: Request, res: Response) => {
 export const getPostsByUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-
     // Query posts by userId, newest first
     const snapshot = await db
       .collection("posts")
@@ -145,6 +144,47 @@ export const getPostsByUser = async (req: Request, res: Response) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch posts for user" });
+  }
+};
+
+export const getPostsByUserName = async (req: Request, res: Response) => {
+  try {
+    const { userName } = req.params;
+    
+    if (!userName) {
+      return res.status(400).json({ error: "userName is required" });
+    }
+
+    // Fetch posts where userName matches
+    const snapshot = await db
+      .collection("posts")
+      .where("userName", "==", userName)
+      .get();
+    
+    // Build posts with totalLikes & totalComments
+    const posts = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const data = doc.data();
+        
+        // fetch comments for this post
+        const commentsSnapshot = await db
+          .collection("comments")
+          .where("postId", "==", doc.id)
+          .get();
+
+        return {
+          id: doc.id,
+          ...data,
+          totalLikes: data.likes?.length || 0,
+          totalComments: commentsSnapshot.size,
+        };
+      })
+    );
+    
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching posts by userName:", err);
+    res.status(500).json({ error: "Failed to fetch posts for userName" });
   }
 };
 

@@ -4,10 +4,12 @@ import { TAGS } from "@/constants/tags";
 import TagSelector from "@/components/TagSelector";
 import { createPostStyles } from "@/assets/styles/createPost.styles";
 import * as postService from "@/services/postService";
+import { useRouter } from 'expo-router'
 
 export default function CreatePostScreen() {
+  const router = useRouter()
   const [text, setText] = useState<string>("");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handlePost = async () => {
@@ -15,29 +17,29 @@ export default function CreatePostScreen() {
       Alert.alert("Error", "Post text cannot be empty");
       return;
     }
-    if (!selectedTag) {
-      Alert.alert("Error", "Please select a tag for your post");
+
+    if (selectedTags.length < 1) {
+      Alert.alert("Error", "Select at least one category");
       return;
     }
 
-    setLoading(true);
+    if (selectedTags.length > 3) {
+      Alert.alert("Error", "You can select a maximum of 3 categories");
+      return;
+    }
 
     try {
-      const newPost = {
-        id: Date.now().toString(),
-        username: "Anonymous",
-        text: text.trim(),
-        tag: selectedTag,
-        date: new Date().toISOString(),
-      };
-
-      await postService.createPost(newPost);
+      setLoading(true);
+      const result = await postService.createPost(text, selectedTags);
+      
+      // Then show alert after a small delay
+      Alert.alert("Success", "Post created successfully!");
+      // Reset
       setText("");
-      setSelectedTag(null);
-      Alert.alert("Success", "Your post has been created!");
-    } catch (e) {
-      Alert.alert("Error", "Failed to create post");
-      console.error(e);
+      setSelectedTags([]);
+      router.back()
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to create post");
     } finally {
       setLoading(false);
     }
@@ -57,9 +59,14 @@ export default function CreatePostScreen() {
         style={createPostStyles.textInput}
       />
 
-      <Text style={createPostStyles.tagLine}>Choose a tag for your post.</Text>
+      <Text style={createPostStyles.tagLine}>Choose up to 3 categories.</Text>
       
-      <TagSelector tags={TAGS} selectedTag={selectedTag} onSelect={setSelectedTag} />
+      <TagSelector
+        tags={TAGS}
+        selectedTags={selectedTags}
+        onSelect={setSelectedTags}
+        maxSelection={3}
+      />
 
       <TouchableOpacity
         onPress={handlePost}

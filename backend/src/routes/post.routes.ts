@@ -9,7 +9,8 @@ import {
   likePost,
   commentPost,
   getCommentsByPost,
-  getPostsByCategory
+  getPostsByCategory,
+  getPostsByUserName
 } from "../services/post.services";
 import { authenticateToken } from "../middleware/auth.middleware";
 
@@ -23,7 +24,8 @@ router.put("/:id", authenticateToken, updatePost);         // Update post (only 
 router.delete("/:id", authenticateToken, deletePost);      // Delete post (only creator)
 
 // Filtered posts
-router.get("/user/:userId", authenticateToken, getPostsByUser); // Posts by user
+router.get("/user/id/:userId", authenticateToken, getPostsByUser); // Posts by user
+router.get("/user/name/:userName", authenticateToken, getPostsByUserName);
 router.get("/category/:category", authenticateToken, getPostsByCategory);      // Posts by tag
 
 // Interactions

@@ -140,11 +140,40 @@ export const PostItemStyles = StyleSheet.create({
     flexDirection: "row",
   },
   actionBtn: {
-    marginRight: 16,
+    marginRight: 26,
   },
   actionText: {
     fontWeight: "700",
   },
+
+
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
+    gap: 30, 
+  },
+  actionGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5, 
+  },
+
+  countText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: COLORS.primary,
+  },
+
+  actionEmoji: {
+    fontSize: 16,
+    marginLeft: 4,
+  },
+
+  actionButton: {
+    marginRight: 20,
+  }
 });
 
 /* Modal styles for change password & edit post */

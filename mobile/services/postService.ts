@@ -1,90 +1,69 @@
-// src/services/postService.ts
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuidv4 } from "uuid";
+import { api } from './authService';
 
-const POSTS_KEY = "dummy_user_posts";
+// Post type
+export interface Post {
+  id: string;
+  userId: string;
+  userName: string;
+  email: string;
+  content: string;
+  category: string | string[];
+  likes: string[];
+  createdAt: string;
+  totalLikes?: number;
+  totalComments?: number;
+}
 
-const DUMMY = [
-  {
-    id: "p1",
-    userId: "user-1",
-    username: "Hasibul Hasan",
-    text: "Hello from my profile! This is a sample post.",
-    date: new Date().toISOString(),
-  },
-  {
-    id: "p2",
-    userId: "user-1",
-    username: "Hasibul Hasan",
-    text: "Another post to test profile editing and deletion.",
-    date: new Date().toISOString(),
-  },
-  {
-    id: "p3",
-    userId: "user-1",
-    username: "Hasibul Hasan",
-    text: "Hello from my profile! This is a sample post.",
-    date: new Date().toISOString(),
-  },
-  {
-    id: "p4",
-    userId: "user-1",
-    username: "Hasibul Hasan",
-    text: "Another post to test profile editing and deletion.",
-    date: new Date().toISOString(),
-  },
-  {
-    id: "p5",
-    userId: "user-1",
-    username: "Hasibul Hasan",
-    text: "Hello from my profile! This is a sample post.",
-    date: new Date().toISOString(),
-  },
-  {
-    id: "p6",
-    userId: "user-1",
-    username: "Hasibul Hasan",
-    text: "Another post to test profile editing and deletion.",
-    date: new Date().toISOString(),
-  },
-];
-
-async function ensureInit() {
-  const raw = await AsyncStorage.getItem(POSTS_KEY);
-  if (!raw) {
-    await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(DUMMY));
+export const getAllPosts = async (): Promise<Post[]> => {
+  try {
+    const response = await api.get('/post/'); // GET /post
+    return response.data;
+  } catch (error: any) {
+    console.warn('Failed to fetch posts:', error?.response?.data || error.message);
+    throw new Error('Failed to fetch posts');
   }
-}
+};
 
-export async function getPostsByUser(userId: string) {
-  // await ensureInit();
-  // const raw = await AsyncStorage.getItem(POSTS_KEY);
-  // const all = raw ? JSON.parse(raw) : [];
-  // return all.filter((p: any) => p.userId === userId);
-  return DUMMY.filter((p) => p.userId === userId);
-}
+export const createPost = async (content: string, category: string[]) => {
+  try {
+    const response = await api.post('/post/', {
+      content,
+      category,
+    });
 
-export async function deletePost(id: string) {
-  const raw = await AsyncStorage.getItem(POSTS_KEY);
-  const all = raw ? JSON.parse(raw) : [];
-  const filtered = all.filter((p: any) => p.id !== id);
-  await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(filtered));
-  return true;
-}
+    return response.data;
+  } catch (error: any) {
+    console.warn("Failed to create post:", error?.response?.data || error.message);
+    throw new Error("Failed to create post");
+  }
+};
 
-export async function updatePost(id: string, payload: any) {
-  const raw = await AsyncStorage.getItem(POSTS_KEY);
-  const all = raw ? JSON.parse(raw) : [];
-  const updated = all.map((p: any) => (p.id === id ? { ...p, ...payload, date: new Date().toISOString() } : p));
-  await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(updated));
-  return updated.find((p: any) => p.id === id);
-}
+export const getPostsByUser = async (userId: string) => {
+  try {
+    const response = await api.get(`/post/user/id/${userId}`);
+    return response.data;
+  } catch (error: any) {
+    console.warn("Failed to fetch user posts:", error?.response?.data || error.message);
+    throw new Error("Failed to fetch user posts");
+  }
+};
 
-export async function createPost(payload: any) {
-  const raw = await AsyncStorage.getItem(POSTS_KEY);
-  const all = raw ? JSON.parse(raw) : [];
-  const post = { id: uuidv4(), ...payload, date: new Date().toISOString() };
-  all.unshift(post);
-  await AsyncStorage.setItem(POSTS_KEY, JSON.stringify(all));
-  return post;
-}
+export const updatePost = async (postId: string, data: { content: string; category: string[] }) => {
+  try {
+    const response = await api.put(`/post/${postId}`, data);
+    return response.data;
+  } catch (error: any) {
+    console.warn("Failed to update post:", error?.response?.data || error.message);
+    throw new Error("Failed to update post");
+  }
+};
+
+export const deletePost = async (postId: string) => {
+  try {
+    const response = await api.delete(`/post/${postId}`);
+    return response.data;
+  } catch (error: any) {
+    console.warn("Failed to delete post:", error?.response?.data || error.message);
+    throw new Error("Failed to delete post");
+  }
+};
