@@ -14,31 +14,25 @@ import PostItem from "@/components/PostItem";
 import { ProfileStyles } from "@/assets/styles/profile.styles";
 import { styles as feedStyles } from "@/assets/styles/feed.styles";
 import { useTheme } from "@/context/ThemeContext";
-import { useAuth } from "@/context/AuthContext";
 import * as userService from "@/services/userService";
 import * as postService from "@/services/postService";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import EditPostModal from "@/components/EditPostModal";
 import { ThemeKey } from "@/constants/colors";
-import { useClerk } from "@clerk/clerk-expo";
 import * as Linking from 'expo-linking'
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { themeName, themes, setThemeName } = useTheme();
-  const { userId, logout } = useAuth();
-
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [pwModalVisible, setPwModalVisible] = useState(false);
   const [editPost, setEditPost] = useState<any | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-
   const themeOptions = Object.keys(themes) as ThemeKey[];
   const flatListRef = useRef<FlatList>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const { signOut } = useClerk()
 
   useEffect(() => {
     loadProfile();
@@ -53,7 +47,7 @@ export default function ProfileScreen() {
   
   const handleSignOut = async () => {
     try {
-      await signOut()
+      // await signOut()
       // Redirect to Login
       Linking.openURL(Linking.createURL('/(auth)/login'))
     } catch (err) {
@@ -64,7 +58,7 @@ export default function ProfileScreen() {
   async function loadProfile() {
     setLoading(true);
     try {
-      const u = await userService.getUser(userId);
+      const u = await userService.getUser("user-1");
       setUser(u);
     } catch (e) {
       console.warn("Failed to load user", e);
@@ -76,7 +70,7 @@ export default function ProfileScreen() {
   async function loadMyPosts() {
     setRefreshing(true);
     try {
-      const posts = await postService.getPostsByUser(userId);
+      const posts = await postService.getPostsByUser("user-1");
       setMyPosts(posts);
     } catch (e) {
       console.warn("Failed to load posts", e);

@@ -7,7 +7,6 @@ import { styles as feedStyles } from "@/assets/styles/feed.styles";
 
 export default function Feed() {
   const [posts, setPosts] = useState(dummyPosts);
-  // <-- give the ref the correct instance type for FlatList
   const flatListRef = React.useRef<FlatList<any> | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 

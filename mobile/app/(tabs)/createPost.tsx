@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
-import { useAuth } from "@/context/AuthContext";
 import { TAGS } from "@/constants/tags";
 import TagSelector from "@/components/TagSelector";
 import { createPostStyles } from "@/assets/styles/createPost.styles";
 import * as postService from "@/services/postService";
 
 export default function CreatePostScreen() {
-  const { userId, user } = useAuth();
   const [text, setText] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,8 +25,7 @@ export default function CreatePostScreen() {
     try {
       const newPost = {
         id: Date.now().toString(),
-        userId,
-        username: user?.name || "Anonymous",
+        username: "Anonymous",
         text: text.trim(),
         tag: selectedTag,
         date: new Date().toISOString(),

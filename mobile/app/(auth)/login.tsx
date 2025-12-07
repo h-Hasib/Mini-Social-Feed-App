@@ -1,4 +1,3 @@
-import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useState } from 'react'
@@ -8,7 +7,6 @@ import { Ionicons } from '@expo/vector-icons'
 import { COLORS } from '@/constants/colors'
 
 export default function Page() {
-  const { signIn, setActive, isLoaded } = useSignIn()
   const router = useRouter()
 
   const [emailAddress, setEmailAddress] = useState('')
@@ -16,40 +14,7 @@ export default function Page() {
   const [error, setError] = useState('')
   // Handle the submission of the sign-in form
   const onSignInPress = async () => {
-    if (!isLoaded) return
-
-    // Start the sign-in process using the email and password provided
-    try {
-      const signInAttempt = await signIn.create({
-        identifier: emailAddress,
-        password,
-      })
-
-      // If sign-in process is complete, set the created session as active
-      // and redirect the user
-      if (signInAttempt.status === 'complete') {
-        await setActive({ session: signInAttempt.createdSessionId })
-        router.replace('/feed')
-      } else {
-        // If the status isn't complete, check why. User might need to
-        // complete further steps.
-        // console.error(JSON.stringify(signInAttempt, null, 2))
-      }
-    } catch (err : any) {
-      if (err.errors?.[0]?.code === 'form_identifier_not_found'){
-        setError('User Not Found')
-      }
-      else if (err.errors?.[0]?.code === 'form_password_incorrect'){
-        setError('Incorrect Password')
-      }
-      else if (err.errors?.[0]?.code === 'form_conditional_param_missing' || err.errors?.[0]?.code === 'form_param_nil'){
-        setError('Enter your email and password')
-      }
-      else {
-        setError("Something went wrong, please try again")
-      }
-      // console.error(JSON.stringify(err, null, 2))
-    }
+    router.replace('/feed')
   }
 
   return (
@@ -92,12 +57,6 @@ export default function Page() {
         <TouchableOpacity style={styles.button} onPress={onSignInPress}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-
-        {/* <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-          
-            <Text>Sign up</Text>
-          </Link>
-        </View> */}
       
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>Don&apos;t have an account?</Text>

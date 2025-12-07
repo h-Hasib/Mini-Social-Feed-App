@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DEFAULT_USER = {
   id: "user-1",
-  name: "Hasibul Hasan",
+  userName: "Hasibul Hasan",
   email: "hasib@example.com",
   phone: "+8801712345678",
   theme: "coffee",

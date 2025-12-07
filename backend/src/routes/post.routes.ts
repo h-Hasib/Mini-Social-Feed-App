@@ -2,13 +2,33 @@ import { Router } from "express";
 import {
   createPost,
   getPosts,
-  getPostById
+  getPostById,
+  updatePost,
+  deletePost,
+  getPostsByUser,
+  likePost,
+  commentPost,
+  getCommentsByPost,
+  getPostsByCategory
 } from "../services/post.services";
+import { authenticateToken } from "@/middleware/auth.middleware";
 
 const router = Router();
 
-router.post("/", createPost);      // Create a text-only post
-router.get("/", getPosts);         // Paginated posts
-router.get("/:id", getPostById);   // Single post detail
+// Posts
+router.post("/", authenticateToken, createPost);           // Create post
+router.get("/", authenticateToken, getPosts);              // Feed with counts
+router.get("/:id", authenticateToken, getPostById);        // Single post detail
+router.put("/:id", authenticateToken, updatePost);         // Update post (only creator)
+router.delete("/:id", authenticateToken, deletePost);      // Delete post (only creator)
+
+// Filtered posts
+router.get("/user/:userId", authenticateToken, getPostsByUser); // Posts by user
+router.get("/category/:category", authenticateToken, getPostsByCategory);      // Posts by tag
+
+// Interactions
+router.post("/like/:id", authenticateToken, likePost);           // Like/unlike post
+router.post("/comment/:id", authenticateToken, commentPost);     // Add comment
+router.get("/comment/:id", authenticateToken, getCommentsByPost); // Get comments for a post
 
 export default router;

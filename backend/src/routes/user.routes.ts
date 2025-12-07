@@ -1,18 +1,13 @@
 import { Router } from "express";
 import {
-  createUser,
-  getUsers,
   getUser,
-  updateUser,
-  deleteUser
+  updateUser
 } from "../services/user.services";
+import { authenticateToken } from "@/middleware/auth.middleware";
 
 const router = Router();
 
-router.post("/", createUser);      // Create
-router.get("/", getUsers);         // Get all
-router.get("/:id", getUser);       // Get single
-router.put("/:id", updateUser);    // Update
-router.delete("/:id", deleteUser); // Delete
+router.get("/:id", authenticateToken, getUser);       // Get single
+router.put("/:id", authenticateToken, updateUser);    // Update
 
 export default router;
