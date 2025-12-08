@@ -1,3 +1,5 @@
+import PushNotificationManager from '@/components/PushNotificationManager';
+import SafeScreen from '@/components/SafeScreen';
 import { Redirect, Stack } from 'expo-router'
 
 export default function AuthRoutesLayout() {
@@ -6,5 +8,11 @@ export default function AuthRoutesLayout() {
   // if (isSignedIn) {
   //   return <Redirect href={'/feed'} />
   // }
-  return <Stack screenOptions={{ headerShown: false }}/>
+  return (
+    <PushNotificationManager>
+      <SafeScreen>
+        <Stack screenOptions={{ headerShown: false }}/>
+      </SafeScreen>
+    </PushNotificationManager>
+  );
 }

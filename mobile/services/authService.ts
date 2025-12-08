@@ -6,7 +6,6 @@ const API_BASE_URL = 'https://mini-social-feed-app.vercel.app';
 
 // const API_BASE_URL = 'http://localhost:5000';
 
-// Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

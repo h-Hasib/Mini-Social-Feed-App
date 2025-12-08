@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { COLORS } from '@/constants/colors';
 
-
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -14,6 +13,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    // height: 20
   },
   searchInput: {
     flex: 1,
@@ -21,7 +21,8 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 16,
+    fontSize: 15,
+    marginRight: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
     color: COLORS.text,
@@ -29,7 +30,7 @@ export const styles = StyleSheet.create({
   searchButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     marginLeft: 8,
     borderRadius: 10,
   },
@@ -78,8 +79,8 @@ export const styles = StyleSheet.create({
 
   tag: {
     backgroundColor: COLORS.border,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 9,
+    paddingVertical: 2,
     borderRadius: 12,
     marginLeft: 5,
   },
@@ -91,24 +92,24 @@ export const styles = StyleSheet.create({
   },
   
   username: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     color: COLORS.text,
   },
   
   email: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textLight,
   },
 
   date: {
-    fontSize: 12,
+    fontSize: 9,
     color: COLORS.textLight,
     marginTop: 2,
   },
 
   postText: {
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.text,
     marginVertical: 10,
   },

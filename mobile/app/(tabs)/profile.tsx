@@ -187,12 +187,14 @@ export default function ProfileScreen() {
             {/* Account actions */}
             <View style={ProfileStyles.section}>
               <Text style={ProfileStyles.sectionTitle}>Account</Text>
-              <TouchableOpacity
-                style={ProfileStyles.button}
-                onPress={() => setPwModalVisible(true)}
-              >
-                <Text style={ProfileStyles.buttonText}>Change Password</Text>
-              </TouchableOpacity>
+              <View style={{flexDirection: "row", justifyContent: "center"}}>
+                <TouchableOpacity
+                  style={ProfileStyles.button}
+                  onPress={() => setPwModalVisible(true)}
+                >
+                  <Text style={ProfileStyles.buttonText}>Change Password</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Theme Selection */}
@@ -243,7 +245,7 @@ export default function ProfileScreen() {
       )}
 
       {/* Logout */}
-      <View style={{ padding: 16 }}>
+      <View style={{ flexDirection: "row", justifyContent: "center", padding: 16 }}>
         <TouchableOpacity
           style={[ProfileStyles.button, { backgroundColor: "#ff5757" }]}
           onPress={() =>
@@ -300,7 +302,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   username: {
-    fontSize: 24,
+    fontSize: 10,
     fontWeight: 'bold',
     marginBottom: 5,
   },

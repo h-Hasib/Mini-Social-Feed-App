@@ -1,4 +1,3 @@
-// src/components/ThemeCard.tsx
 import React from "react";
 import { TouchableOpacity, View, Text } from "react-native";
 import { ThemeCardStyles } from "@/assets/styles/profile.styles";

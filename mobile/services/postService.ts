@@ -1,6 +1,5 @@
 import { api } from './authService';
 
-// Post type
 export interface Post {
   id: string;
   userId: string;

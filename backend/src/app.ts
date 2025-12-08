@@ -62,6 +62,4 @@ app.post("/api/push-notification", async(req, res) => {
   }
 })
 
-//-----------------------------------------------
-
 export default app;

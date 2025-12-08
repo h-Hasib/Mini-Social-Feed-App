@@ -1,4 +1,3 @@
-// src/components/UserAvatar.tsx
 import React from "react";
 import { View, Text } from "react-native";
 import { AvatarStyles } from "@/assets/styles/profile.styles";

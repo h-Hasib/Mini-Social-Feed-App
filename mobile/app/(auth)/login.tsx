@@ -27,11 +27,10 @@ export default function LoginScreen() {
       console.log('Login Success:', response);
 
       const { accessToken } = response; // get JWT from login
-      // 1. Register device for push notifications
+
       const pushToken = await registerForPushNotificationsAsync();
 
       if (pushToken) {
-        // 2. Send token to backend
         await api.post(
           '/user/push-token',
           { token: pushToken },

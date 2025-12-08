@@ -20,7 +20,7 @@ export default function TabsLayout() {
         height: 70,
         },
         tabBarLabelStyle: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '600',
       },
       tabBarIcon: ({ focused, color, size }) => {
@@ -36,7 +36,7 @@ export default function TabsLayout() {
           iconName = focused ? 'user-alt' : 'user';
           IconComponent = FontAwesome5;
         }
-        return <IconComponent name={iconName as any} size={28} color={color} />;
+        return <IconComponent name={iconName as any} size={24} color={color} />;
         },
       })}
     >

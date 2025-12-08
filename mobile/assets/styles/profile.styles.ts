@@ -41,6 +41,7 @@ export const ProfileStyles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingVertical: 12,
     paddingHorizontal: 14,
+    width: "70%",
     borderRadius: 10,
     alignItems: "center",
     alignSelf: "stretch",
@@ -125,14 +126,16 @@ export const PostItemStyles = StyleSheet.create({
     marginBottom: 8,
   },
   username: {
+    fontSize: 13,
     fontWeight: "700",
     color: COLORS.text,
   },
   date: {
     color: COLORS.textLight,
-    fontSize: 12,
+    fontSize: 10,
   },
   text: {
+    fontSize: 16,
     color: COLORS.text,
     marginBottom: 10,
   },
