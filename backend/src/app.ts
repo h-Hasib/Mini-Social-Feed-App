@@ -7,7 +7,6 @@ import rateLimiter from "./middleware/rateLimiter";
 import cookieParser from "cookie-parser";
 import cors from 'cors';
 import { Expo } from 'expo-server-sdk';
-import { r } from "@upstash/redis/zmscore-DhpQcqpW";
 
 // Initialize Firebase Admin with environment variable
 if (!admin.apps.length) {
