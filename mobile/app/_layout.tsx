@@ -5,10 +5,10 @@ import PushNotificationManager from "../components/PushNotificationManager";
 // import { PushNotificationManager } from 
 export default function RootLayout() {
   return (
-    <SafeScreen>
-      <PushNotificationManager>
+    <PushNotificationManager>
+      <SafeScreen>
         <Slot screenOptions={{ headerShown: true }} />
-      </PushNotificationManager>
-    </SafeScreen>
+      </SafeScreen>
+    </PushNotificationManager>
   );
 }
