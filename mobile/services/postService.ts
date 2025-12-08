@@ -14,6 +14,16 @@ export interface Post {
   totalComments?: number;
 }
 
+export interface Comment {
+  id: string;
+  postId?: string;
+  userId?: string;
+  userName: string;
+  email?: string;
+  content: string;
+  createdAt?: string;
+}
+
 export const getAllPosts = async (): Promise<Post[]> => {
   try {
     const response = await api.get('/post/'); // GET /post
@@ -85,5 +95,32 @@ export const deletePost = async (postId: string) => {
   } catch (error: any) {
     console.warn("Failed to delete post:", error?.response?.data || error.message);
     throw new Error("Failed to delete post");
+  }
+};
+
+export const toggleLikePost = async (postId: string): Promise<{ msg: string; totalLikes: number}> => {
+  try {
+    const response = await api.post(`/post/like/${postId}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to toggle like");
+  }
+};
+
+export const addComment = async (postId: string, content: string): Promise<Comment> => {
+  try {
+    const response = await api.post(`/post/comment/${postId}`, { content });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to add comment");
+  }
+};
+
+export const getPostComments = async (postId: string): Promise<Comment[]> => {
+  try {
+    const response = await api.get(`/post/comment/${postId}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch comments");
   }
 };

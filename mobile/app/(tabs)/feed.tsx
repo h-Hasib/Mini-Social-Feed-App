@@ -5,7 +5,7 @@ import PostCard from "@/components/PostCard";
 import { styles as feedStyles } from "@/assets/styles/feed.styles";
 import { getAllPosts, getPostsByCategory, getPostsByUserName, Post } from "../../services/postService"
 import { COLORS } from "@/constants/colors";
-import { useFocusEffect } from "expo-router";
+import { getCurrentUser } from '../../services/authService';
 
 export default function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -15,8 +15,15 @@ export default function Feed() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [searchName, setSearchName] = useState<string>("");
   const [searchTag, setSearchTag] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    const loadCurrentUser = async () => {
+      const user = await getCurrentUser();
+      setCurrentUserId(user?.id || null);
+    };
+    loadCurrentUser();
+
     fetchPosts();
   }, []);
  
@@ -126,7 +133,9 @@ export default function Feed() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 80 }}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={({ item }) => (
+          <PostCard post={item} currentUserId={currentUserId || ''} />
+        )}
         onRefresh={handleRefresh}
         refreshing={refreshing}
         onScroll={handleScroll}

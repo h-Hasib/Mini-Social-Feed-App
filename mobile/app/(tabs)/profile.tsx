@@ -44,7 +44,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     loadUserProfile();
-    fetchPosts();
+    // fetchPosts();
   }, []);
 
   const loadUserProfile = async () => {
@@ -68,6 +68,9 @@ export default function ProfileScreen() {
     }
   };
   const fetchPosts = async () => {
+    if (!user || !user.id) {
+      return;
+    }
     setLoading(true);
     setRefreshing(true);
     try {
@@ -120,6 +123,7 @@ export default function ProfileScreen() {
   }
 
   async function handleUpdatePost(updated: any) {
+    if (!user || !user.id) return;
     try {
       const post = await postService.updatePost(updated.id, updated);
       setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));

@@ -57,6 +57,7 @@ export default function CreatePostScreen() {
         value={text}
         onChangeText={setText}
         style={createPostStyles.textInput}
+        maxLength={200}
       />
 
       <Text style={createPostStyles.tagLine}>Choose up to 3 categories.</Text>

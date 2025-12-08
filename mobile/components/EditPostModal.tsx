@@ -22,6 +22,7 @@ export default function EditPostModal({ visible, onClose, post, onSave }: any) {
             multiline
             numberOfLines={4}
             style={[ModalStyles.input, { height: 120 }]}
+            maxLength={200}
           />
 
           <View style={ModalStyles.row}>
