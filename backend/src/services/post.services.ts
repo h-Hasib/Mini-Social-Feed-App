@@ -37,6 +37,7 @@ export const getPosts = async (_: Request, res: Response) => {
       const postId = doc.id;
       const commentsSnapshot = await db.collection("comments")
                                         .where("postId", "==", postId)
+                                        .orderBy("createdAt", "asc")
                                         .get();
 
       return {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { styles as feedStyles } from '@/assets/styles/feed.styles';
-import { COLORS } from '@/constants/colors';
 import { Post, toggleLikePost } from '@/services/postService';
 import CommentModal from './CommentModal';
 
