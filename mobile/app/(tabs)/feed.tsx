@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, FlatList, TouchableOpacity, Text, Alert, ActivityIndicator } from "react-native";
 import SearchBar from "@/components/SearchBar";
 import PostCard from "@/components/PostCard";
-import { dummyPosts } from "@/data/dummyPosts";
 import { styles as feedStyles } from "@/assets/styles/feed.styles";
-import { getAllPosts, Post } from "../../services/postService"
+import { getAllPosts, getPostsByCategory, getPostsByUserName, Post } from "../../services/postService"
 import { COLORS } from "@/constants/colors";
-import { getPostsByUser } from "../../services/postService";
-import { getCurrentUser } from "@/services/authService";
+import { useFocusEffect } from "expo-router";
 
 export default function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -15,12 +13,13 @@ export default function Feed() {
   const [refreshing, setRefreshing] = useState(false);
   const flatListRef = React.useRef<FlatList<any> | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [searchText, setSearchText] = useState<string>("");
+  const [searchName, setSearchName] = useState<string>("");
+  const [searchTag, setSearchTag] = useState<string>("");
 
   useEffect(() => {
     fetchPosts();
   }, []);
-
+ 
   const fetchPosts = async () => {
     setLoading(true);
     try {
@@ -38,23 +37,32 @@ export default function Feed() {
     try {
       const data = await getAllPosts();
       setPosts(data);
+      setSearchName("");
+      setSearchTag("");
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to refresh posts");
     } finally {
       setRefreshing(false);
+      setSearchName("");
+      setSearchTag("");
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchText.trim()) {
+  const handleUserSearch = async () => {
+    if (!searchName.trim()) {
       fetchPosts();
       return;
     }
     setLoading(true);
     try {
-      const data = await getPostsByUser(searchText.trim());
-      console.log("first", )
-      setPosts(data);
+      const data = await getPostsByUserName(searchName.trim());
+  
+      if (data && data.length != 0) {
+        setPosts(data);
+      }
+      else{
+        Alert.alert("Error", "No posts found");
+      }
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to fetch posts");
     } finally {
@@ -62,6 +70,27 @@ export default function Feed() {
     }
   };
   
+  const handleCategorySearch = async () => {
+    if (!searchTag.trim()) {
+      fetchPosts();
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await getPostsByCategory(searchTag.trim());
+  
+      if (data && data.length != 0) {
+        setPosts(data);
+      }
+      else{
+        Alert.alert("Error", "No posts found");
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to fetch posts");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleScroll = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -79,9 +108,16 @@ export default function Feed() {
   return (
     <View style={feedStyles.container}>
       <SearchBar
-        value={searchText}
-        onChangeText={(text: string) => setSearchText(text)}
-        onSearchPress={handleSearch}
+        value={searchName}
+        onChangeText={setSearchName}
+        onSearchPress={handleUserSearch}
+        placeholder="Search by username"
+      />
+      <SearchBar
+        value={searchTag}
+        onChangeText={setSearchTag}
+        onSearchPress={handleCategorySearch}
+        placeholder="Or, search by category"
       />
 
       <FlatList

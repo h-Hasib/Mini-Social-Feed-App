@@ -48,7 +48,27 @@ export const getPostsByUser = async (userId: string) => {
   }
 };
 
-export const updatePost = async (postId: string, data: { content: string; category: string[] }) => {
+export const getPostsByUserName = async (userName: string) => {
+  try {
+    const response = await api.get(`/post/user/name/${userName}`);
+    return response.data;
+  } catch (error: any) {
+    console.warn("Failed to fetch user posts:", error?.response?.data || error.message);
+    throw new Error("Failed to fetch user posts");
+  }
+};
+
+export const getPostsByCategory = async (category: string) => {
+  try {
+    const response = await api.get(`/post/category/${category}`);
+    return response.data;
+  } catch (error: any) {
+    console.warn("Failed to fetch user posts:", error?.response?.data || error.message);
+    throw new Error("Failed to fetch user posts");
+  }
+};
+
+export const updatePost = async (postId: string, data: { content: string; category?: string[] }) => {
   try {
     const response = await api.put(`/post/${postId}`, data);
     return response.data;

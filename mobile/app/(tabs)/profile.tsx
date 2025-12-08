@@ -14,8 +14,8 @@ import PostItem from "@/components/PostItem";
 import { ProfileStyles } from "@/assets/styles/profile.styles";
 import { styles as feedStyles } from "@/assets/styles/feed.styles";
 import { useTheme } from "@/context/ThemeContext";
-import * as userService from "@/services/userService";
-import * as postService from "@/services/postService";
+import * as userService from "../../services/userService";
+import * as postService from "../../services/postService";
 import ChangePasswordModal from "@/components/ChangePasswordModal";
 import EditPostModal from "@/components/EditPostModal";
 import { ThemeKey } from "@/constants/colors";
@@ -124,8 +124,13 @@ export default function ProfileScreen() {
       const post = await postService.updatePost(updated.id, updated);
       setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));
       setEditPost(null);
+      setRefreshing(true);
+      const userPosts = await getPostsByUser(user.id);
+      setPosts(userPosts);
     } catch (e) {
       Alert.alert("Error", "Could not update post");
+    }finally {
+      setRefreshing(false);
     }
   }
 
@@ -158,7 +163,7 @@ export default function ProfileScreen() {
       <FlatList
         ref={flatListRef}
         data={posts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item?.id}
         refreshing={refreshing}
         onRefresh={fetchPosts}
         onEndReachedThreshold={0.5}
@@ -169,10 +174,10 @@ export default function ProfileScreen() {
           <>
             {/* User Info */}
             <View style={ProfileStyles.header}>
-              <UserAvatar name={user.userName} size={96} />
-              <Text style={ProfileStyles.name}>{user.userName}</Text>
-              <Text style={ProfileStyles.email}>{user.email}</Text>
-              {user.phone && <Text style={ProfileStyles.phone}>{user.phone}</Text>}
+              <UserAvatar name={user?.userName} size={96} />
+              <Text style={ProfileStyles.name}>{user?.userName}</Text>
+              <Text style={ProfileStyles.email}>{user?.email}</Text>
+              {user?.phone && <Text style={ProfileStyles.phone}>{user?.phone}</Text>}
             </View>
 
             {/* Account actions */}
@@ -216,7 +221,7 @@ export default function ProfileScreen() {
           <PostItem
             post={item}
             onEdit={() => setEditPost(item)}
-            onDelete={() => handleDeletePost(item.id)}
+            onDelete={() => handleDeletePost(item?.id)}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
@@ -224,7 +229,7 @@ export default function ProfileScreen() {
           <Text style={ProfileStyles.emptyText}>No posts yet.</Text>
         }
       />
-      {showScrollTop && posts.length > 0 && (
+      {showScrollTop && posts?.length > 0 && (
         <TouchableOpacity
           style={[feedStyles.scrollTopButton, {marginBottom: 50}]}
           onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}

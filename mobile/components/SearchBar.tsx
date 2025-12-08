@@ -7,17 +7,19 @@ interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   onSearchPress: () => Promise<void>;
+  placeholder?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ value, onChangeText, onSearchPress }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ value, onChangeText, onSearchPress, placeholder }) => {
   return (
     <View style={feedStyles.searchContainer}>
       <TextInput
-        placeholder="Search user..."
+        placeholder={placeholder}
         placeholderTextColor={COLORS.textLight}
         style={feedStyles.searchInput}
         value={value}
         onChangeText={onChangeText}
+        clearTextOnFocus={false}
       />
 
       <TouchableOpacity style={feedStyles.searchButton} onPress={onSearchPress}>
