@@ -3,10 +3,10 @@ import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { savePushToken } from '@/services/userService';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
@@ -80,8 +80,15 @@ const PushNotificationManager: React.FC<PropsWithChildren<{}>> = ({ children }) 
   };
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then((token) => {
-      if (token) { }
+    registerForPushNotificationsAsync().then( async (token) => {
+      if (token) { 
+        try {
+          await savePushToken(token);
+          console.log("Push token saved to backend");
+        } catch (e) {
+          console.log("Error saving token", e);
+        }
+      }
     });
 
     // Notification received listener

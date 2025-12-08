@@ -38,3 +38,21 @@ export const updateUser = async (req: Request, res: Response) => {
     res.status(500).json({ error: err });
   }
 };
+
+
+export const savePushToken = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.user!;
+    const { token } = req.body;
+    console.log("*********************************")
+    if (!token) return res.status(400).json({ error: "Token missing" });
+
+    await db.collection("users").doc(userId).update({
+      expoPushToken: token,
+    });
+
+    res.json({ msg: "Token saved successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
+};

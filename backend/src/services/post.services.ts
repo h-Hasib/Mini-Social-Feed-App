@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { db } from "../app";
 import Post from "../types/post";
+import { Expo } from "expo-server-sdk";
+
+const expo = new Expo();
 
 // CREATE POST
 export const createPost = async (req: Request, res: Response) => {
@@ -239,45 +242,137 @@ export const deletePost = async (req: Request, res: Response) => {
 };
 
 
+// export const likePost = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const { userId } = req.user!;
+
+//     const postRef = db.collection("posts").doc(id);
+//     const doc = await postRef.get();
+//     if (!doc.exists) return res.status(404).json({ error: "Post not found" });
+
+//     const likes: string[] = doc.data()?.likes || [];
+//     if (!likes.includes(userId)) likes.push(userId);
+//     else likes.splice(likes.indexOf(userId), 1); // unlike
+
+//     await postRef.update({ likes });
+//     res.json({ msg: "Post like updated", totalLikes: likes.length });
+//   } catch (err) {
+//     res.status(500).json({ error: err });
+//   }
+// };
 export const likePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { userId } = req.user!;
+    const { userId, userName } = req.user!;
 
     const postRef = db.collection("posts").doc(id);
     const doc = await postRef.get();
     if (!doc.exists) return res.status(404).json({ error: "Post not found" });
 
-    const likes: string[] = doc.data()?.likes || [];
-    if (!likes.includes(userId)) likes.push(userId);
-    else likes.splice(likes.indexOf(userId), 1); // unlike
+    const post = doc.data();
+    const likes: string[] = post?.likes || [];
+    const postOwnerId = post?.userId;
+
+    // Like/unlike logic
+    const alreadyLiked = likes.includes(userId);
+    if (!alreadyLiked) likes.push(userId);
+    else likes.splice(likes.indexOf(userId), 1);
 
     await postRef.update({ likes });
+
+    // Avoid notifying yourself
+    if (userId !== postOwnerId && !alreadyLiked) {
+      const userDoc = await db.collection("users").doc(postOwnerId).get();
+      const token = userDoc.data()?.expoPushToken;
+
+      if (token && Expo.isExpoPushToken(token)) {
+        await expo.sendPushNotificationsAsync([
+          {
+            to: token,
+            title: "New Like ❤️",
+            body: `${userName} liked your post`,
+            data: { postId: id },
+          },
+        ]);
+      }
+    }
+
     res.json({ msg: "Post like updated", totalLikes: likes.length });
   } catch (err) {
     res.status(500).json({ error: err });
   }
 };
 
+// export const commentPost = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;  // postId
+//     const { content } = req.body;
+//     const { userId, userName, email } = req.user!;
+
+//     if (!content) return res.status(400).json({ error: "Comment content is required" });
+
+//     const newComment = {
+//       postId: id,
+//       userId,
+//       userName,
+//       email,
+//       content,
+//       createdAt: new Date().toISOString()
+//     };
+
+//     const docRef = await db.collection("comments").add(newComment);
+//     res.status(201).json({ id: docRef.id, ...newComment });
+//   } catch (err) {
+//     res.status(500).json({ error: err });
+//   }
+// };
 
 export const commentPost = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;  // postId
+    const { id } = req.params;
     const { content } = req.body;
-    const { userId, userName, email } = req.user!;
+    const { userId, userName } = req.user!;
 
-    if (!content) return res.status(400).json({ error: "Comment content is required" });
+    if (!content)
+      return res.status(400).json({ error: "Comment content is required" });
+
+    // Get postOwnerId
+    const postRef = db.collection("posts").doc(id);
+    const postSnap = await postRef.get();
+    
+    if (!postSnap.exists)
+      return res.status(404).json({ error: "Post not found" });
+
+    const postOwnerId = postSnap.data()?.userId;
 
     const newComment = {
       postId: id,
       userId,
       userName,
-      email,
       content,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     const docRef = await db.collection("comments").add(newComment);
+
+    // Notify ONLY if commenter is not the post creator
+    if (userId !== postOwnerId) {
+      const userDoc = await db.collection("users").doc(postOwnerId).get();
+      const token = userDoc.data()?.expoPushToken;
+
+      if (token && Expo.isExpoPushToken(token)) {
+        await expo.sendPushNotificationsAsync([
+          {
+            to: token,
+            title: "New Comment 💬",
+            body: `${userName} commented on your post`,
+            data: { postId: id },
+          },
+        ]);
+      }
+    }
+
     res.status(201).json({ id: docRef.id, ...newComment });
   } catch (err) {
     res.status(500).json({ error: err });
