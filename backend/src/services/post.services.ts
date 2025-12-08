@@ -324,7 +324,7 @@ export const likePost = async (req: Request, res: Response) => {
     res.json({ msg: 'Post like updated', totalLikes: likes.length });
 
     // ✅ Send push notification to post creator (skip if liker is creator)
-    if (creatorId !== userId) {
+    // if (creatorId !== userId) {
       const creatorDoc = await db.collection('users').doc(creatorId).get();
       const pushToken = creatorDoc.data()?.expoPushToken;
 
@@ -338,7 +338,7 @@ export const likePost = async (req: Request, res: Response) => {
         };
         await expo.sendPushNotificationsAsync([message]);
       }
-    }
+    // }
 
   } catch (err) {
     res.status(500).json({ error: err });
@@ -446,7 +446,7 @@ export const commentPost = async (req: Request, res: Response) => {
     const postDoc = await db.collection('posts').doc(id).get();
     const creatorId = postDoc.data()?.userId;
 
-    if (creatorId !== userId) {
+    // if (creatorId !== userId) {
       const creatorDoc = await db.collection('users').doc(creatorId).get();
       const pushToken = creatorDoc.data()?.expoPushToken;
 
@@ -460,7 +460,7 @@ export const commentPost = async (req: Request, res: Response) => {
         };
         await expo.sendPushNotificationsAsync([message]);
       }
-    }
+    // }
 
   } catch (err) {
     res.status(500).json({ error: err });
