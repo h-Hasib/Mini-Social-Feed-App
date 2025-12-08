@@ -5,7 +5,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { styles } from '@/assets/styles/auth.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
-import { loginUser } from '../../services/authService';
+import { api, loginUser } from '../../services/authService';
+import { registerForPushNotificationsAsync } from '@/services/notificationService';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -24,6 +25,23 @@ export default function LoginScreen() {
       const response = await loginUser(payload);
 
       console.log('Login Success:', response);
+
+      const { accessToken } = response; // get JWT from login
+      // 1. Register device for push notifications
+      const pushToken = await registerForPushNotificationsAsync();
+
+      if (pushToken) {
+        // 2. Send token to backend
+        await api.post(
+          '/user/push-token',
+          { token: pushToken },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        console.log('Push token saved successfully');
+      }
+
+
+
       router.replace('/feed'); // Navigate after successful login
     } catch (err: any) {
       setError(err.message);
