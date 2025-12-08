@@ -40,8 +40,6 @@ export default function LoginScreen() {
         console.log('Push token saved successfully');
       }
 
-
-
       router.replace('/feed'); // Navigate after successful login
     } catch (err: any) {
       setError(err.message);

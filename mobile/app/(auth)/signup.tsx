@@ -6,7 +6,9 @@ import { styles } from '@/assets/styles/auth.styles'
 import { COLORS } from '@/constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import { signupUser } from '../../services/authService'
+import { api, signupUser } from '../../services/authService'
+import { registerForPushNotificationsAsync } from '../../services/notificationService';
+
 
 export default function SignUpScreen() {
   const router = useRouter()
@@ -21,52 +23,32 @@ export default function SignUpScreen() {
   const onSignUpPress = async () => {
     setError('');
     setLoading(true);
-    router.replace('/feed')
+    // router.replace('/feed')
     try {
       const payload = { email: emailAddress, password: password, userName: userName };
       const response = await signupUser(payload);
-
       console.log('Signup Success:', response);
-      router.replace('/feed'); // Navigate after successful login
+      const { accessToken } = response;
+
+      const pushToken = await registerForPushNotificationsAsync();
+
+      if (pushToken) {
+        // 2. Send token to backend
+        await api.post(
+          '/user/push-token',
+          { token: pushToken },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        console.log('Push token saved successfully');
+      }
+
+      router.replace('/feed');
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }
-
-  // Handle submission of verification form
-  const onVerifyPress = async () => {
-    router.replace('/feed')
-  }
-
-  // if (pendingVerification) {
-  //   return (
-  //     <View style={styles.verificationContainer}>
-  //       <Text style={styles.verificationTitle}>Verify your email</Text>
-
-  //       {error ? (
-  //         <View style={styles.errorBox}>
-  //           <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
-  //           <Text style={styles.errorText}>{error}</Text>
-  //           <TouchableOpacity onPress={() => setError('')}>
-  //             <Ionicons name="close" size={20} color={COLORS.textLight} />
-  //           </TouchableOpacity>
-  //         </View>
-  //       ):null}
-
-  //       <TextInput
-  //         style={[styles.verificationInput, error && styles.errorInput]}
-  //         value={code}
-  //         placeholder="Enter your verification code"
-  //         onChangeText={(code) => setCode(code)}
-  //       />
-  //       <TouchableOpacity onPress={onVerifyPress} style={styles.button}>
-  //         <Text style={styles.buttonText}>Verify</Text>
-  //       </TouchableOpacity>
-  //     </View>
-  //   )
-  // }
 
   return (
     <KeyboardAwareScrollView 
