@@ -55,7 +55,7 @@ export default function LoginScreen() {
       enableAutomaticScroll={true}
     >
       <View style={styles.container}>
-        <Image source={require('@/assets/images/android-icon-foreground.png')} style={styles.illustration}/>
+        <Image source={require('@/assets/images/icon.png')} style={styles.illustration}/>
         <Text style={styles.title}>Welcome Back!</Text>
         
         {error ? (
